@@ -19,7 +19,7 @@ def load_movies_data(url):
     #use the in-build string function .str()
     #del var (delete)
     #use the in-build string function .to_datetime from str to TimeStamped
-    df=df[(df.release_date.str.len())>5]#already delete the bad data
+    df=df[(df.release_date.str.len())>5].reset_index()#already delete the bad data
     df.release_date = pd.to_datetime(df.release_date, format = '%Y-%m-%d')
     #eval(var) from string to dict
     #type(var) return the type of var
@@ -38,5 +38,6 @@ df=load_movies_data(url)
 end = time.time()
 print (str(end-start))
 
-df=df[df.adult.apply(lambda x:True if  x=='False' else False)]#drop if adult is true
-
+df=df[df.adult.apply(lambda x:True if  x=='False' else False)].reset_index()#drop if adult is true
+df=df[~df.vote_count.apply(np.isnan)]
+df=df[~df.vote_average.apply(np.isnan)]
