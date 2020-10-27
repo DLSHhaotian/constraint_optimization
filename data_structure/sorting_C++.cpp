@@ -24,6 +24,10 @@ void bucketSort(vector<int>& array);//桶排序,最简单的情况 知道了要�
 void bucketSort_better(vector<int>& array);//桶排序，减少空间，修改散列函数可以让一个桶子装多个元素，所以桶排序涵盖比较广，你可以设计自己的散列函数，把所有元素分类到有限的桶中，再分别用别的排序方法
 void countingSort(vector<int>& array);//计数排序也比较傻...（只适用于一定范围整数）这个版本的计数排序可以说是第一个桶排序的强化版本，是可以处理相同值的情况下的，第一个桶排序版本是把对应位置置为1，计数排序是往上加1，这样有相同的也会输出出来，同时他先遍历找了一下最小值和最大值，然后减小了空间，增加了一些时间
 void radixSort(vector<int>& array);//基数排序，基数排序(Radix Sort)是桶排序的扩展，它的基本思想是：将整数按位数切割成不同的数字，然后按每个位数分别比较。
+void heapSort(vector<int>& array);//堆排序，堆即优先级队列，一般使用大顶堆和小顶堆，类似于完全二叉树，不维护全序，只维护父节点比子节点的大小关系，提取从根处开始，把最后一位提到根处然后下滤，插入会插入最后一位再上滤
+void heapBuild(vector<int>& array,int root,int length);//建堆，输入父节点，对父节点和子节点进行堆的处理,需要输入长度
+void quickSort(vector<int>& array,int left, int right);//快排，找分割点，左边都小于分割点，右边都大于分割点，如何找分割点，先挖坑，左右向里面查找填坑
+void shellSort(vector<int>& array);//希尔排序，是插入排序的衍生，为了减少时间，用n/2的间隔来把整个序列分组，然后分别插入排序，一直到最后一次性插入排序完成
 int main() {
     vector<int> arrayT{3,5,1,4,7,9};
     vector<int> arrayT2{22,44,14,15,90,87,67,36};
@@ -53,7 +57,10 @@ int main() {
     //bucketSort(arrayT);
     //bucketSort_better(arrayT2);
     //countingSort(arrayT2);
-    radixSort(arrayT2);
+    //radixSort(arrayT2);
+    //heapSort(arrayT2);
+    //quickSort(arrayT2,0,arrayT2.size()-1);
+    shellSort(arrayT2);
     for(auto it=arrayT2.begin();it!=arrayT2.end();++it){
         cout<<*it<<endl;
     }
@@ -327,4 +334,78 @@ void radixSort(vector<int>& array){
         }
 
     }
+}
+void heapBuild(vector<int>& array,int root, int length) {//root在这个函数里改变就可以了，不必用引用
+    //int value_root=array[root];//父节点的值
+    int index_lc = 2 * root + 1;//子节点的下标为2k+1,2k+2;
+    int index_rc = 2 * root + 2;
+    int index_min = root;
+    /*
+    while(index_lc<length){//依次处理子节点作为父节点，循环
+        if(array[index_rc]>array[index_lc])
+            index_min=index_lc;//找左右子节点的最小值
+        if(index_rc<length && array[index_rc]<array[index_lc])
+            index_min=index_rc;//找左右子节点的最小值
+        if(index_min!=root)
+            std::swap(array[index_min],array[root]);
+        else
+            break;
+        root=index_min;//继续下滤找子节点的子节点
+        index_lc=2*root+1;
+        index_rc=2*root+2;//这里其实使用递归更整洁，但使用了迭代
+        index_min=root;
+    }*/
+    if (index_lc < length && array[index_min] < array[index_lc])
+        index_min = index_lc;//比较父节点和左节点
+    if (index_rc < length && array[index_rc] > array[index_min])
+        index_min = index_rc;//比较父节点和右节点，堆不在乎两个孩子互相的大小
+    if (index_min != root) {
+        std::swap(array[index_min], array[root]);
+        heapBuild(array,index_min,length);
+    }
+}
+void heapSort(vector<int>& array){
+    if(array.empty())
+        return;
+    int len=array.size();
+    for(int i=len/2-1;i>=0;--i){//从倒数第二层开始，每一层的第一个都是2n+1
+        heapBuild(array,i,len);//建堆
+    }
+    for(auto it=array.begin();it!=array.end();++it){
+        cout<<*it<<endl;
+    }
+    for(int i=len-1;i>=1;--i){
+        std::swap(array[0],array[i]);
+        heapBuild(array,0,i);
+    }
+}
+
+void quickSort(vector<int>& array,int left, int right){
+    if(left<right){
+        int i=left;
+        int j=right;
+        int x=array[i];
+        while(i<j){
+            while(i<j&&array[j]>=x)//右边向左边推进找第一个小的值
+                --j;
+            if(i<j)
+                array[i++]=array[j];//顺次填坑，赋值后下标再加一
+            while(i<j&&array[i]<x)//左边向右边推进找第一个大的值
+                ++i;
+            if(i<j)
+                array[j--]=array[i];
+        }
+        array[i]=x;
+        quickSort(array,left,i-1);
+        quickSort(array,i+1,right);
+    }
+}
+
+void shellSort(vector<int>& array){
+    int size=array.size();
+    for(int gap=size/2;gap>0;gap/=2)//这是gap的循环，假如10个元素，gap5为5组 排序，然后2组 排序，然后1组 排序
+        for(int i=gap;i<size;++i)//这是每一次gap里的遍历每个组
+            for(int j=i-gap;j>=0&&array[j]>array[j+gap];j-=gap)//然后执行插入排序，向前互换 j要大于等于0！交换到最后为止
+                std::swap(array[j],array[j+gap]);
+
 }
