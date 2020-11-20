@@ -87,15 +87,17 @@ bool bubbleSort_slow(vector<int>& array){
     }
     return sorted;
 }
-
+//没有考虑如果输入的数组本身就是有序的，会陷入死循环，所以要加一个flag
 void bubbleSort_fast(vector<int>& array){
+    bool sorted=false
     int left=0;
     int right=array.size()-1;
     int last=right;
-    while(left<last){
-
+    while(left<last && !sorted){
+        sorted=true
         while(left<right){
             if(array[left]>array[left+1]){
+                sorted=false
                 last=left;
                 swap(array[left],array[left+1]);
             }
