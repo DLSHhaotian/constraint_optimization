@@ -118,6 +118,8 @@ void mergeSort(vector<int>& array,int lo,int hi){
     mergeSort(array,mi+1,hi);//分解右半端
     merge(array,lo,mi,hi);//合并
 }
+//这里的归并是对已经拆开的两个有序数组进行合并，所以和之前双指针的部分中所提到的相同。
+//只要是对有序的数组或者链表进行合并都可以使用这个方法
 void merge(vector<int>& array, int lo,int mi,int hi){
     int i=lo;//i表示左半端的第一个
     int k=0;//k是我们临时存储有序数组的迭代器，所以从0开始
@@ -337,10 +339,12 @@ void radixSort(vector<int>& array){
 
     }
 }
+//堆与优先级队列联系比较紧密，主要是上浮和下沉。
+//主要是父节点，左节点，右节点的关系
 void heapBuild(vector<int>& array,int root, int length) {//root在这个函数里改变就可以了，不必用引用
     //int value_root=array[root];//父节点的值
     int index_lc = 2 * root + 1;//子节点的下标为2k+1,2k+2;
-    int index_rc = 2 * root + 2;
+    int index_rc = 2 * root + 2;//如果根节点在数组中的位置为0，那么子节点为2k+1,2k+2.但如果根节点在数组中的位置为1，那么子节点为2k,2k+1.
     int index_min = root;
     /*
     while(index_lc<length){//依次处理子节点作为父节点，循环
@@ -411,3 +415,39 @@ void shellSort(vector<int>& array){
                 std::swap(array[j],array[j+gap]);
 
 }
+
+//补充一下对于官方sort函数如何自定义比较关系
+//首先sort函数的比较形参是一个函数即可，不像是优先级队列里必须是个类
+//关于sort函数的自定义函数，一般是先定义一个标准的函数，再把函数名传给sort的第三个形参，但C++11里的lambda省事太多直接[]
+//如果想定义函数来做，那么有一个注意点就是，sort的compare要求的是一个普通函数指针，不能是一个成员函数指针
+//类成员函数指针与普通函数指针不是一码事。前者要用.*与->*运算符来使用，而后者可以用*运算符（称为“解引用”dereference，或称“间址”indirection）。
+//普通函数指针实际上保存的是函数体的开始地址，因此也称“代码指针”，以区别于C / C++最常用的数据指针。
+//而类成员函数指针就不仅仅是类成员函数的内存起始地址，还需要能解决因为C++的多重继承、虚继承而带来的类实例地址的调整问题，所以类成员函数指针在调用的时候一定要传入类实例对象。
+//指针函数是一个正常函数，返回一个指针
+//函数指针是一个指针指向一个函数，然后这个指针可以用来当函数用，或者成为形参
+//所以如果在类中，比较函数必须为静态才是普通函数指针，如果在类外，正常函数声明即可
+
+//那么接下来就是sort比较函数的规定
+//可以看到comp的定义：comp函数返回一个bool类型的值，这个值表示了在严格弱排序中（可以理解为升序排序）第一参数是否位于第二个参数之前。
+//也就是说如果comp返回true，则第一个参数小于第二个参数，sort根据compare的返回值将第一个参数排在第二个参数之前。
+//如果comp返回false，则第一个参数大于第二个参数，sort根据compare的返回值将第一个参数排在第二个参数之后。
+//总结起来就是：
+//sort函数根据comp函数的返回值，对comp函数的两个参数排序。
+//如果comp返回true，排序为“参数1”“参数2”，否则排序为“参数2”“参数1”。
+//想要升序排列，则return parameter1<parameter2
+//想要降序排列，则return parameter1>parameter2
+
+//一个示例
+//static bool compare(const string& s1, const string& s2)
+//{
+//    string ab = s1 + s2;
+//    string ba = s2 + s1;
+//    return ab < ba; //升序排列。如改为ab > ba, 则为降序排列
+//}
+
+//优先级队列的比较方式更复杂，需要声明为类
+//struct Comp {
+//bool operator() (ListNode* l1, ListNode* l2) {
+//    return l1->val > l2->val;
+//}
+//};
