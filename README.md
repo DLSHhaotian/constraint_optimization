@@ -1,4 +1,5 @@
-# Constrained optimisation
+# Constrained optimization
+Research on numerical optimization algorithms for constrained optimization problems
 ## Convex quadratic programming(QP) with linear equality constraints
 Matrix decomposition for solving linear equations:
 - LU dense decomposition
